@@ -1,44 +1,39 @@
 package compiladores;
 
-import compiladores.compiladoresParser.ExpContext;
-import compiladores.compiladoresParser.ExpresionesContext;
-import compiladores.compiladoresParser.FactorContext;
-import compiladores.compiladoresParser.ProgramaContext;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
 
-public class Caminante extends compiladoresBaseVisitor<String> {
+public class Caminante {
+    public static void main(String[] args) throws Exception {
+        // Cambia "input.c" al nombre del archivo que quieres analizar
+        CharStream input = CharStreams.fromFileName("input.c");
+        CompiladoresLexer lexer = new CompiladoresLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CompiladoresParser parser = new CompiladoresParser(tokens);
 
-    @Override
-    public String visitPrograma(ProgramaContext arg0) {
-        // TODO Auto-generated method stub
-        System.out.println("Comenzamos a caminar el arbol");
-        return super.visitPrograma(arg0);
-    }
+        parser.removeErrorListeners(); // Remove default ConsoleErrorListener
+        parser.addErrorListener(new CustomErrorListener()); // Add custom error listener
 
-    @Override
-    public String visitExpresiones(ExpresionesContext arg0) {
-        // TODO Auto-generated method stub
-        System.out.println("Llegamos a las expresiones");
-        return super.visitExpresiones(arg0);
-    }
+        ParseTree tree = parser.programa(); // parse
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Escucha escucha = new Escucha();
+        walker.walk(escucha, tree);
 
-    @Override
-    public String visitFactor(FactorContext arg0) {
-        // TODO Auto-generated method stub
-        System.out.println("FACTOR tiene " + arg0.getChildCount() + " hijos - texto " + arg0.getText());
-        if (arg0.getChildCount() == 3) {
-            System.out.println("Salto a exp");
-            return super.visitExp((ExpContext)arg0.getChild(1));
+        // Output symbol table
+        System.out.println("Tabla de símbolos:");
+        for (Map.Entry<String, Symbol> entry : escucha.getSymbolTable().entrySet()) {
+            Symbol symbol = entry.getValue();
+            System.out.println(entry.getKey() + ": tipo=" + symbol.type + ", inicializado=" + symbol.initialized + ", usado=" + symbol.used);
         }
-        return super.visitFactor(arg0);
-    }
 
-    @Override
-    public String visitExp(ExpContext arg0) {
-        // TODO Auto-generated method stub
-        System.out.println("Llegamos a las exp");
-        return super.visitExp(arg0);
+        // Output errors
+        if (!escucha.getErrors().isEmpty()) {
+            System.out.println("Errores encontrados:");
+            for (String error : escucha.getErrors()) {
+                System.out.println(error);
+            }
+        } else {
+            System.out.println("No se encontraron errores.");
+        }
     }
-    
-
-    
 }
