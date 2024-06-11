@@ -2,13 +2,7 @@ package compiladores;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
-import compiladores.compiladoresParser.DeclaracionContext;
-import compiladores.compiladoresParser.InstruccionContext;
-import compiladores.compiladoresParser.ProgramaContext;
-import compiladores.compiladoresParser.AsignacionContext;
-import compiladores.compiladoresParser.TipoContext;
-import compiladores.compiladoresParser.TerminoContext;
+import compiladores.compiladoresParser.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,4 +132,12 @@ public class Escucha extends compiladoresBaseListener {
     public String toString() {
         return "Escucha [nodos=" + nodos + ", hojas=" + hojas + "]";
     }
+
+    public Map<String,Symbol> getSymbolTable(){
+     return symbolTable;
+    }
+    public Set<String> getErrors() {
+        return errors;
+    }
 }
+
