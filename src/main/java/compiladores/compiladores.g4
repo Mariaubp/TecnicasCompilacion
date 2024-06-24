@@ -1,4 +1,9 @@
 grammar compiladores;
+
+@header {
+package compiladores;
+}
+
 INT: 'int';
 DOUBLE: 'double';
 IF: 'if';
@@ -22,18 +27,23 @@ DIV: '/';
 WS: [ \t\r\n]+ -> skip;
 COMPARACION: '<' | '>' | '==' | '!=' | '<=' | '>=';
 
-programa: (instruccion)+;
+programa: (instruccion)* EOF;
 
-instruccion: declaracion
+instruccion: declaracionFuncion
+    | declaracionVariable
     | asignacion
     | bucleWhile
     | estructuraIf
     | bucleFor
     | retorno
     | llamadaFuncion
-    | declaracionFuncion;
+    | bloque;
 
-declaracion: tipo listaDeclaradores PUNTOCOMA;
+bloque: LLAVEIZQ (instruccion)* LLAVEDER;
+
+declaracionFuncion: tipo ID PARENIZQ listaParametros? PARENDER bloque;
+
+declaracionVariable: tipo listaDeclaradores PUNTOCOMA;
 
 tipo: INT | DOUBLE;
 
@@ -56,27 +66,23 @@ termino: ID
     | llamadaFuncion
     | PARENIZQ expresion PARENDER;
 
-bucleWhile: WHILE PARENIZQ expresion PARENDER LLAVEIZQ programa LLAVEDER;
+bucleWhile: WHILE PARENIZQ expresion PARENDER bloque;
 
-estructuraIf: IF PARENIZQ expresion PARENDER LLAVEIZQ programa LLAVEDER (ELSE LLAVEIZQ programa LLAVEDER)?;
+estructuraIf: IF PARENIZQ expresion PARENDER bloque (ELSE bloque)?;
 
-bucleFor: FOR PARENIZQ forInit PUNTOCOMA expresion? PUNTOCOMA forUpdate? PARENDER LLAVEIZQ programa LLAVEDER;
+bucleFor: FOR PARENIZQ forInit PUNTOCOMA expresion? PUNTOCOMA forUpdate? PARENDER bloque;
 
-forInit: declaracionSinPuntoComa | asignacionSinPuntoComa | ;
+forInit: asignacionSinPuntoComa;
 
 forUpdate: asignacionSinPuntoComa (COMA asignacionSinPuntoComa)*;
 
 asignacionSinPuntoComa: ID IGUAL expresion;
-
-declaracionSinPuntoComa: tipo listaDeclaradores;
 
 retorno: RETURN expresion PUNTOCOMA;
 
 llamadaFuncion: ID PARENIZQ listaArgumentos? PARENDER;
 
 listaArgumentos: expresion (COMA expresion)*;
-
-declaracionFuncion: tipo ID PARENIZQ listaParametros? PARENDER LLAVEIZQ programa LLAVEDER;
 
 listaParametros: parametro (COMA parametro)*;
 
